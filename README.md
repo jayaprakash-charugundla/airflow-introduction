@@ -20,3 +20,5 @@ Host=https://randomuser.me/
 
 > airflow tasks test user_processing is_api_available 2021-1-1
 > airflow tasks test user_processing extracting_user 2021-1-1
+> airflow tasks test user_processing processing_user 2021-1-1
+> airflow tasks test user_processing storing_user 2021-1-1

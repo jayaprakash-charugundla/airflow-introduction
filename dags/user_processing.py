@@ -39,7 +39,7 @@ with DAG('user_processing', schedule_interval='@daily',
         task_id = 'creating_table',
         sqlite_conn_id = 'db_sqlite',
         sql = '''
-                CREATE TABLE users (
+                CREATE TABLE IF NOT EXISTS users (
                     firstname TEXT NOT NULL,
                     lastname TEXT NOT NULL,
                     country TEXT NOT NULL,
@@ -74,3 +74,5 @@ with DAG('user_processing', schedule_interval='@daily',
         task_id = 'storing_user',
         bash_command = 'echo -e ".separator ","\n.import /tmp/processed_user.csv users" | sqlite3 /home/airflow/airflow/airflow.db'
     )
+
+creating_table >> is_api_available >> extracting_user >> processing_user >> storing_user
