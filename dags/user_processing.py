@@ -26,3 +26,9 @@ with DAG('user_processing', schedule_interval='@daily',
                 );
               '''
     )
+
+    is_api_available = HttpSensor(
+        task_id = 'is_api_available',
+        http_conn_id = 'user_api',
+        endpoint = 'api/'
+    )
