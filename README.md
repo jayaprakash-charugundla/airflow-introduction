@@ -22,3 +22,9 @@ Host=https://randomuser.me/
 > airflow tasks test user_processing extracting_user 2021-1-1
 > airflow tasks test user_processing processing_user 2021-1-1
 > airflow tasks test user_processing storing_user 2021-1-1
+> sudo apt update
+> sudo apt install postgresql
+> sudo -u postgres psql
+> ALTER USER postgres PASSWORD postgres
+
+> pip install 'apache-airflow[postgres]'
