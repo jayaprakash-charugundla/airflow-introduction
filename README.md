@@ -28,3 +28,7 @@ Host=https://randomuser.me/
 > ALTER USER postgres PASSWORD postgres
 
 > pip install 'apache-airflow[postgres]'
+> airflow db test
+> airflow db init
+> airflow webserver
+> airflow scheduler
