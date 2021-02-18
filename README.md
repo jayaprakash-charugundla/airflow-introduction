@@ -22,6 +22,8 @@ Host=https://randomuser.me/
 > airflow tasks test user_processing extracting_user 2021-1-1
 > airflow tasks test user_processing processing_user 2021-1-1
 > airflow tasks test user_processing storing_user 2021-1-1
+
+
 > sudo apt update
 > sudo apt install postgresql
 > sudo -u postgres psql
@@ -32,3 +34,14 @@ Host=https://randomuser.me/
 > airflow db init
 > airflow webserver
 > airflow scheduler
+
+> pip install 'apache-airflow[celery]'
+> sudo apt update
+> sudo apt install redis-server
+> sudo nano /etc/redis/redis.conf
+update supervisor to systemd
+> sudo systemctl restart redis.service
+update broker_url and result_backend
+> pip install 'apache-airflow[redis]'
+> airflow celery flower
+> airflow celery worker
