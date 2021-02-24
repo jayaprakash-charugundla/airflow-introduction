@@ -45,3 +45,6 @@ update broker_url and result_backend
 > pip install 'apache-airflow[redis]'
 > airflow celery flower
 > airflow celery worker
+
+
+> pip install apache-airflow-providers-elasticsearch
