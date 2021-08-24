@@ -5,8 +5,14 @@ from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
-def _extract(partner_name):
-    print(partner_name)
+def _extract(ti):
+    pet_name = "Max"
+    ti.xcom_push(key = "pet_name", value = pet_name)
+
+def _process(ti):
+	pet_name = ti.xcom_pull(key = "pet_name", task_ids = "extract")
+	Variable.set("pet_name", pet_name)
+	print(pet_name)
 
 with DAG("my_dag",
          description = "DAG in charge of processing customer",
@@ -23,17 +29,49 @@ with DAG("my_dag",
 		sql = "sql/create_pet.sql"
 	)
 
+	delete_from_pet_table = PostgresOperator(
+		task_id = "delete_from_pet_table",
+		postgres_conn_id = "postgres_default",
+		sql = "DELETE from pet"
+	)
+
 	populate_pet_table = PostgresOperator(
 		task_id = "populate_pet_table",
 		postgres_conn_id = "postgres_default",
-		sql = "sql/insert_data_into_pet.sql"
+		sql = "sql/populate_data_into_pet.sql"
 	)
 
-	fetch_pet_names = PostgresOperator(
-		task_id = "fetch_pet_names",
+	extract = PythonOperator(
+        task_id = "extract",
+        python_callable = _extract
+        #op_args = ["{{var.value.my_dag_partner.name}}"]
+    )
+
+	process = PythonOperator(
+        task_id = "process",
+        python_callable = _process
+    )
+
+	fetch_pet_names_by_date = PostgresOperator(
+		task_id = "fetch_pet_names_by_date",
 		postgres_conn_id = "postgres_default",
-		sql= "sql/fetch_pet_names.sql"
+		sql= "sql/fetch_pet_names_by_date.sql"
+	)
+
+	fetch_pet_names_by_name = PostgresOperator(
+		task_id = "fetch_pet_names_by_name",
+		postgres_conn_id = "postgres_default",
+		sql= "sql/fetch_pet_names_by_name.sql",
+		params={'pet_name': 'Max'}
+	)
+
+	#TODO Can't use xcom value in PostgresOperator
+	fetch_pet_names_by_name_using_xcom = PostgresOperator(
+		task_id = "fetch_pet_names_by_name_using_xcom",
+		postgres_conn_id = "postgres_default",
+		sql= "sql/fetch_pet_names_by_name.sql",
+		params={'pet_name': '{{pet_name}}'}
 	)
 
 
-create_pet_table >> populate_pet_table >> fetch_pet_names
+create_pet_table >> delete_from_pet_table >> populate_pet_table >> extract >> process >> fetch_pet_names_by_date >> fetch_pet_names_by_name >> fetch_pet_names_by_name_using_xcom
