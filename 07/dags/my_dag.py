@@ -6,13 +6,14 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 def _extract(ti):
-    pet_name = "Max"
-    ti.xcom_push(key = "pet_name", value = pet_name)
+   pet_name = "Max"
+   pet_type = "Dog"
+   return {"pet_name":pet_name, "pet_type":pet_type}
 
 def _process(ti):
-	pet_name = ti.xcom_pull(key = "pet_name", task_ids = "extract")
-	Variable.set("pet_name", pet_name)
-	print(pet_name)
+    pet_json = ti.xcom_pull(task_ids = "extract")
+	print(pet_json['pet_name'])
+	print(pet_json['pet_type'])
 
 with DAG("my_dag",
          description = "DAG in charge of processing customer",
