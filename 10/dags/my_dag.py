@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from airflow.decorators import task, dag
 from groups.process_tasks import process_tasks
 
-@task.python
-def extract(task_id = "extract", do_xcom_push = False, multiple_outputs = True):
+@task.python(task_id = "extract", do_xcom_push = False, multiple_outputs = True)
+def extract():
    pet_name = "Max"
    pet_type = "Dog"
    return {"pet_name":pet_name, "pet_type":pet_type}
