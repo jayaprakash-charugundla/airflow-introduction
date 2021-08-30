@@ -45,6 +45,11 @@ def _extract_failure_callback(context):
 def _extract_retry_callback(context):
     print('RETRY CALLBACK')
 
+def _sla_miss_callback(dag, task_list, blocking_task_list, slas, blocking_tis):
+    print(task_list)
+    print(blocking_tis)
+    print(slas)
+
 @dag(description = "DAG",
          default_args = default_args,
          schedule_interval = "@daily",
@@ -52,6 +57,7 @@ def _extract_retry_callback(context):
          tags = ["data_science", "customers"],
          catchup = False,
          max_active_runs = 1,
+         sla_miss_callback = _sla_miss_callback,
          on_success_callback = _success_callback,
          on_failure_callback = _failure_callback)
 def my_dag():
@@ -59,6 +65,7 @@ def my_dag():
 
     for partner, details in partners.items():
         @task.python(task_id = f"extract_{partner}",
+            sla = timedelta(minutes = 5),
             on_success_callback = _extract_success_callback,
             on_failure_callback = _extract_failure_callback,
             on_retry_callback = _extract_retry_callback,
