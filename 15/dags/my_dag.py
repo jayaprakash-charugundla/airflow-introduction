@@ -1,8 +1,10 @@
+import time
 from datetime import datetime, timedelta
+
 from airflow.decorators import task, dag
 from airflow.operators.dummy import DummyOperator
+
 from groups.process_tasks import process_tasks
-import time
 
 partners = {
     "partner_snowflake": {
@@ -26,29 +28,33 @@ partners = {
 }
 
 default_args = {
-	"start_date" : datetime(2021, 1, 1),
-	"retries" : 0,
+    "start_date": datetime(2021, 1, 1),
+    "retries": 0,
 }
 
-@dag(description = "DAG",
-         default_args = default_args,
-         schedule_interval = "@daily",
-         dagrun_timeout = timedelta(minutes = 10),
-         tags = ["data_science", "customers"],
-         catchup = False,
-         max_active_runs = 1)
+
+@dag(description="DAG",
+     default_args=default_args,
+     schedule_interval="@daily",
+     dagrun_timeout=timedelta(minutes=10),
+     tags=["data_science", "customers"],
+     catchup=False,
+     max_active_runs=1)
 def my_dag():
-    start = DummyOperator(task_id = "start")
+    start = DummyOperator(task_id="start")
 
     for partner, details in partners.items():
-        @task.python(task_id = f"extract_{partner}", depends_on_past = True, priority_weight = details['priority'], pool = details['pool'],
-        do_xcom_push = False, multiple_outputs = True)
+        @task.python(task_id=f"extract_{partner}", depends_on_past=True, priority_weight=details['priority'],
+                     pool=details['pool'],
+                     do_xcom_push=False, multiple_outputs=True)
         def extract(partner_name, partner_path):
-           time.sleep(3)
-           raise ValueError("failed")
-           return {"partner_name":partner_name, "partner_path":partner_path}
+            time.sleep(3)
+            raise ValueError("failed")
+            return {"partner_name": partner_name, "partner_path": partner_path}
+
         extracted_values = extract(details['name'], details['path'])
         start >> extracted_values
         process_tasks(extracted_values)
+
 
 dag = my_dag()

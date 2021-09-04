@@ -2,22 +2,23 @@ from airflow.hooks.base import BaseHook
 
 from elasticsearch import Elasticsearch
 
-class ElasticHook(BaseHook) :
 
-    def __init__(self, conn_id = 'elasticsearch_default', *args, **kwargs):
+class ElasticHook(BaseHook):
+
+    def __init__(self, conn_id='elasticsearch_default', *args, **kwargs):
         super().__init__(*args, **kwargs)
         conn = self.get_connection(conn_id)
 
         conn_config = {}
         hosts = []
 
-        if(conn.host):
+        if (conn.host):
             hosts = conn.host.split(',')
 
-        if(conn.port):
+        if (conn.port):
             conn_config['port'] = int(conn.port)
 
-        if(conn.login):
+        if (conn.login):
             conn_config['http_auth'] = (conn.login, conn.password)
 
         self.es = Elasticsearch(hosts, **conn_config)
@@ -31,5 +32,5 @@ class ElasticHook(BaseHook) :
 
     def add_doc(self, index, doc_type, doc):
         self.set_index(index)
-        res = self.es.index(index = index, doc_type = doc_type, body = doc)
+        res = self.es.index(index=index, doc_type=doc_type, body=doc)
         return res
